@@ -36,13 +36,10 @@ void encher_matriz(ordem * matriz, int n) //vai criar os array das linha e pedir
 
     for (i=0; i<n; i++)
     {
-        matriz[i].linha = malloc(n * sizeof(float));
+        matriz[i].linha = calloc(n, sizeof(float));
         if (matriz[i].linha==NULL)
         {
             printf("Erro memoria");
-            for (i=0;; i--)
-                free(matriz[i].linha);
-            free(matriz);
             exit(1);
         }
 
@@ -55,7 +52,7 @@ void encher_matriz(ordem * matriz, int n) //vai criar os array das linha e pedir
 ordem * iniciar_matriz (int n) //começando o array que aponta para as linhas
 {
     int i;
-    ordem * matriz = malloc(n * sizeof(ordem));
+    ordem * matriz = calloc(n, sizeof(ordem));
     if (matriz==NULL)
     {
         printf("Erro memoria");
@@ -134,21 +131,98 @@ void fatorLU(ordem * matriz, int n) //organiza para as outras função trabalhar
     return;
 }
 
-void criar_b(int n) //crio o b, depois so modifico o mesmo
-{}
+void determinante(ordem * matriz, int n)//det(A)=det(L)det(U)=1det(U)
+{
+    float det=1;
+    int i;
+    for (i=0; i<n; i++)
+    {
+        det=matriz[i].linha[i]*det;
+    }
+    printf("det(A) = %.10f");
+    return;
+}
 
-void ajeitar_b(int n, ordem * matriz) // PAx = LUx = Pb
-{}
+float * criar_vetor(int n) //crio o x/b, depois so modifico o mesmo
+{
+    float * vetor;
+    vetor = calloc(n, sizeof(float));
+    if (vetor==NULL)
+        {
+            printf("Erro memoria");
+            exit(1);
+        }
+    return vetor;
+}
 
-void resolver_b(ordem * matriz, int n, int b)
+void Ux(ordem * matriz, int n, float * x, float * y)
+{
+    int i, j;
+    float soma;
+    y[n-1] = x[n-1];
+    for (i=n-2; i<0; i--)
+    {
+        soma=0;
+        for (j=i; j>0;j--)
+        {
+            soma += matriz[i].linha[j]*y[j];
+        }
+        y[i] = x[i]/soma;
+    }
+}
+
+void Ly(ordem * matriz, int n, float * b, float * y)
+{
+    int i, j;
+    float soma;
+    y[0] = b[0];
+    for (i=1; i<n; i++)
+    {
+        soma=0;
+        for (j=0; j<i;j++)
+        {
+            soma += matriz[i].linha[j]*y[j];
+        }
+        y[i] = b[i]/soma;
+    }
+    return;
+}
+
+void preencher_b(int n, float * vetor, ordem * matriz)
+{
+    int i, j;
+    for (i=0;i<n;i++)
+    {
+        for (j=i;i<n;i++)
+        {
+            if ((matriz[j].posi-1)==i)
+                {
+                    printf("Digite o valor de b");
+                    scanf("%f", &vetor[i]);
+                }
+        }
+    }
+    printf("Caso tenha mais b outra mensagem aparecerá");
+    return;
+}
+
+void resolver_b(ordem * matriz, int n, int m)
 {
     int i;
-    criar_b(n);
-    for (i=0; i<b; i++)
+    float * b;
+    float * y;
+    float * x;
+    b = criar_vetor(n);
+    y = criar_vetor(n);
+    x = criar_vetor(n);
+    for (i=0; i<m; i++)
     {
-        
-    }
+        preencher_b(n,b,matriz);
 
+    }
+    free(b);
+    free(x);
+    free(y);
     return;
 }
 
@@ -166,7 +240,7 @@ void fre(ordem * matriz, int n) //desalocar memoria ne
 
 int main()
 {
-    unsigned int n, b;
+    unsigned int n, m;
     ordem * matriz;
 
     {printf("Qual tamanho da matriz nxn? Se colocar n nao positivo o codigo quebra\n");
@@ -183,18 +257,18 @@ int main()
     fatorLU(matriz, n);
 
     {printf("Quantos b voce tem em Ax = b?\n"); //LU resolve varios b de "graça"
-    scanf("%u", &b);
+    scanf("%u", &m);
 
-    if (b<=0)
+    if (m<=0)
     {
         printf("Codigo quebrou");
         exit(1);
     }
     }
     
-    
-    
+
     imprimir(matriz, n);
+    determinante(matriz,n);
     free(matriz);
     return 0;
 }
