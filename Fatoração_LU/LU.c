@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 typedef struct ordem //LEMBRAR EM matriz[j].linha[i], i É COLUNA E j É LINHA
 {
@@ -19,6 +20,17 @@ void imprimir(ordem * matriz, int n)
         printf("\n");
     }
     return;
+}
+
+void imprimir_vetor(float * vetor, int n)
+{
+    int j;
+    for (j=0;j<n;j++)
+    {
+        printf("%.10f ",vetor[j]);
+    }
+    printf("\n");
+    return;    
 }
 
 void encher_linha(float * matriz, int n) //preenche os elementos
@@ -68,15 +80,15 @@ ordem * iniciar_matriz (int n) //começando o array que aponta para as linhas
     return matriz;
 }
 
-void pivoparcial(ordem * matriz, int i, int n) //pega maior da coluna e troca as linha
+void pivoparcial(ordem * matriz, int i, int n, int * numerodemud) //pega maior da coluna e troca as linha
 {
     float * aux_pont;
-    int j, aux_int, maior_int=0, k;
-    float maior = ((matriz[0].linha)[i]);
+    int j, maior_int=i, k=i;
+    float maior = matriz[i].linha[i];
 
-    for (j=1; j<n; j++) //achar maior valor
+    for (j=i + 1; j<n; j++) //achar maior valor
     {
-        if (maior <matriz[j].linha[i])
+        if (fabs(matriz[j].linha[i]) > fabs(maior))
         {
             maior = matriz[j].linha[i];
             maior_int = matriz[j].posi;
@@ -84,7 +96,7 @@ void pivoparcial(ordem * matriz, int i, int n) //pega maior da coluna e troca as
         }
     }
 
-    if (maior_int != 0) //caso nn esteja pivotado
+    if (k != i) //caso nn esteja pivotado
     {
         //trocando os ponteiros
         aux_pont = matriz[i].linha; 
@@ -94,6 +106,7 @@ void pivoparcial(ordem * matriz, int i, int n) //pega maior da coluna e troca as
         //trocando as posições
         matriz[k].posi = matriz[i].posi;
         matriz[i].posi = maior_int;
+        (*numerodemud)++;
     }
 
     return;
@@ -107,39 +120,48 @@ void linhaLU(float * alto, float * menor, int n, float mult, int i) //muda o val
     }
     return;
 }
-void fatorLU(ordem * matriz, int n) //organiza para as outras função trabalhar
+void fatorLU(ordem * matriz, int n, int * numeromud) //organiza para as outras função trabalhar
 {
     int i=0, j;
     float multiplicador;
     for (i; i<n; i++) // coluna
     {
-        pivoparcial(matriz, i, n);
+        pivoparcial(matriz, i, n, numeromud);
 
         for (j=(i+1); j<n; j++) // linha
         {
             if (matriz[i].linha[i]==0)
                 {
-                    printf("Matriz não tem posto %n", n); //ou seja, x/0
+                    printf("Matriz não tem posto %d\n", n); //ou seja, x/0
                     imprimir(matriz, n);
                     exit(1);
                 }
             multiplicador = matriz[j].linha[i] / matriz[i].linha[i];
             matriz[j].linha[i] = multiplicador;
-            linhaLU(matriz[i].linha, matriz[j].linha, n, multiplicador, j);
+            linhaLU(matriz[i].linha, matriz[j].linha, n, multiplicador, i+1);
+            if (matriz[j].linha[j]==0)
+            {
+                printf("Matriz não tem posto %d\n", n); //ou seja, x/0
+                imprimir(matriz, n);
+                exit(1);
+            }
         }
     }
     return;
 }
 
-void determinante(ordem * matriz, int n)//det(A)=det(L)det(U)=1det(U)
+void determinante(ordem * matriz, int n, int * numeromud)//det(A)=det(L)det(U)=1det(U)
 {
     float det=1;
     int i;
     for (i=0; i<n; i++)
     {
-        det=matriz[i].linha[i]*det;
+        det= matriz[i].linha[i]*det;
     }
-    printf("det(A) = %.10f");
+
+    if ((*numeromud) % 2 != 0)
+        det = -det;
+    printf("det(A) = %.10f", det);
     return;
 }
 
@@ -159,15 +181,15 @@ void Ux(ordem * matriz, int n, float * x, float * y)
 {
     int i, j;
     float soma;
-    y[n-1] = x[n-1];
-    for (i=n-2; i<0; i--)
+    x[n-1] = y[n-1]/matriz[n-1].linha[n-1];
+    for (i=n-2; i>=0; i--)
     {
         soma=0;
-        for (j=i; j>0;j--)
+        for (j=i + 1; j<n;j++)
         {
-            soma += matriz[i].linha[j]*y[j];
+            soma += matriz[i].linha[j]*x[j];
         }
-        y[i] = x[i]/soma;
+        x[i] = (y[i] - soma)/matriz[i].linha[i];
     }
 }
 
@@ -183,26 +205,27 @@ void Ly(ordem * matriz, int n, float * b, float * y)
         {
             soma += matriz[i].linha[j]*y[j];
         }
-        y[i] = b[i]/soma;
+        y[i] = b[i] - soma;
     }
     return;
 }
 
-void preencher_b(int n, float * vetor, ordem * matriz)
+void preencher_b(int n, float * vetor, ordem * matriz)  
 {
     int i, j;
     for (i=0;i<n;i++)
     {
-        for (j=i;i<n;i++)
+        for (j=0;j<n;j++)
         {
             if ((matriz[j].posi-1)==i)
                 {
-                    printf("Digite o valor de b");
-                    scanf("%f", &vetor[i]);
+                    printf("Digite o valor de b\n");
+                    scanf("%f", &vetor[j]);
+                    break;
                 }
         }
     }
-    printf("Caso tenha mais b outra mensagem aparecerá");
+    printf("Caso tenha mais b outra mensagem aparecerá\n");
     return;
 }
 
@@ -218,7 +241,10 @@ void resolver_b(ordem * matriz, int n, int m)
     for (i=0; i<m; i++)
     {
         preencher_b(n,b,matriz);
-
+        Ly(matriz, n, b, y);
+        Ux(matriz, n, x, y);
+        printf("Solução %d b\n", i);
+        imprimir_vetor(x, n);
     }
     free(b);
     free(x);
@@ -241,6 +267,8 @@ void fre(ordem * matriz, int n) //desalocar memoria ne
 int main()
 {
     unsigned int n, m;
+    int numero=0;
+    int * pont = &numero;
     ordem * matriz;
 
     {printf("Qual tamanho da matriz nxn? Se colocar n nao positivo o codigo quebra\n");
@@ -254,7 +282,7 @@ int main()
     }
     
     matriz = iniciar_matriz(n);
-    fatorLU(matriz, n);
+    fatorLU(matriz, n, pont);
 
     {printf("Quantos b voce tem em Ax = b?\n"); //LU resolve varios b de "graça"
     scanf("%u", &m);
@@ -268,7 +296,8 @@ int main()
     
 
     imprimir(matriz, n);
-    determinante(matriz,n);
-    free(matriz);
+    resolver_b(matriz, n, m);
+    determinante(matriz,n, pont);
+    fre(matriz, n);
     return 0;
 }
