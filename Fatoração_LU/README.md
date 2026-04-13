@@ -9,4 +9,4 @@ Ux = y
 
 Ou seja, podemos achar o valores de varios b e trivialmente o determinante de A também.
 
-Como o processo de pivoteamento precisa em cada redução trocar de lugar duas linhas, notei que isso geraria um gasto de 2n (praticamente), para diminuir o custo, fiz uma array que aponta para as linhas, assim fazendo o processo de pivoteamento ser de 2 (praticamente), ja que so trocamos apenas dois ponteiros de lugar.
+Como o processo de pivoteamento precisa em cada redução trocar de lugar duas linhas, notei que isso geraria um gasto de 3n (contando a variavel auxiliar), para diminuir o custo, fiz uma array que aponta para as linhas, assim fazendo o processo de pivoteamento ser de 3, ja que so trocamos apenas dois ponteiros de lugar.
