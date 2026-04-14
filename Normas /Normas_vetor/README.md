@@ -4,6 +4,6 @@ Normas de vetores são definidas como:
 
 Caso fazemos p tender ao infinito, chegamos em:
 
-  ||x||inf = max{ |x1|, ..., |xp| }
+  ||x||inf = max(1<=i<=n) { |x1|, ..., |xp| }
 
 Assim, o codigo "vetor.c" faz o calculo das normas utilizando as duas equações acima.
