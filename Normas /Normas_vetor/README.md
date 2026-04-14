@@ -1,6 +1,6 @@
 Normas de vetores são definidas como:
 
-  \[||x||p = ( |x1|^p + ... + |xn|^p )^(1/p)\], sendo p qualquer numero natural e x um vetor
+  ||x||p = ( |x1|^p + ... + |xn|^p )^(1/p), sendo p qualquer numero natural e x um vetor
 
 Caso fazemos p tender ao infinito, chegamos em:
 
