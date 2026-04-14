@@ -10,7 +10,7 @@ Ux = y
 Ou seja, podemos achar o valores de varios b e trivialmente o determinante de A também.
 Pois
 
-det(A) = det(L) det (U),
+det(A) = det(L) det (U) (-1)^s, sendo s o numero de permutações.
 mas sabemos que det(L)=1 e det(U) é a multiplicação da diagonal.
 
-Como o processo de pivoteamento precisa em cada redução trocar de lugar duas linhas, notei que isso geraria um gasto de 3n (contando a variavel auxiliar), para diminuir o custo, fiz uma array que aponta para as linhas, assim fazendo o processo de pivoteamento ser de 3, ja que so trocamos apenas dois ponteiros de lugar.
+Como o processo de pivoteamento precisa em cada redução trocar de lugar duas linhas, notei que isso geraria um custo computacional de O(n), para diminuir o custo, fiz um array que aponta para as linhas, assim fazendo o processo de pivoteamento ser de O(1), ja que so trocamos apenas dois ponteiros de lugar.
